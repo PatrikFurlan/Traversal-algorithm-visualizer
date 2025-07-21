@@ -1,17 +1,18 @@
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class GraphPanel extends JPanel {
 
     public static String nodeLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    public static ArrayList<Node> nodes = new ArrayList<>(); // make a map with node name and connections to it eg. A: BCDE
-    public static HashMap<Node, List<Node>> edges = new HashMap<>();
+    public static ArrayList<Node> nodes = new ArrayList<>();
+    public static HashMap<Node, List<Node>> edges = new HashMap<>(); //map with node name and connections to it eg. A: BCDE
 
-    private static int nodesClicked = 0;
-    private static Node[] edgeNodes = new Node[2];
+    public static ArrayList<Node> edgeNodes = new ArrayList<>();
 
     public GraphPanel() {
         setLayout(null);
@@ -20,40 +21,30 @@ public class GraphPanel extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    Node n = new Node(e.getX(), e.getY());
+                    Node n = new Node(e.getX(), e.getY(), GraphPanel.this);
                     nodes.add(n);
+
+                    System.out.println(nodes);
 
                     repaint();
                     add(n);
                     n.repaint();
-                }
-                else if (SwingUtilities.isRightMouseButton(e)) {
-
-                    for(Node n : nodes) {
-
-                        if(onNode(n, e.getX(), e.getY())) {  // TODO REWRITE NODE LINKING SYSTEM
-                           edgeNodes[nodesClicked % 2] = n;
-                           nodesClicked ++;
-
-                            // Define a line connecting two nodes TODO add the connection to the map
-                            if (nodesClicked == 2) {
-                                Edge ed = new Edge(edgeNodes);
-                                System.out.println(ed);
-
-
-                                add(ed);
-                                ed.repaint();
-
-                                nodesClicked = 0;
-                            } else if (nodesClicked == 1) {
-
-                            }
-                        }
-                    }
-                }
+                  }
             }
         });
+    }
 
+    public void checkLinkable() {
+        if (edgeNodes.size() == 2) {
+            Edge ed = new Edge(edgeNodes);
+
+            add(ed);
+            edgeNodes.clear();
+
+            for (Node n : nodes) n.isActive(false);
+
+            ed.repaint();
+        }
     }
 
     public boolean onNode(Node n, int x, int y) {

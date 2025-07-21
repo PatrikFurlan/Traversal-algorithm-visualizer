@@ -1,13 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Edge extends JComponent {
 
     private Node n1, n2;
 
-    public Edge(Node[] en) {
-        this.n1 = en[0];
-        this.n2 = en[1];
+    public Edge(ArrayList<Node> en) {
+        this.n1 = en.get(0);
+        this.n2 = en.get(1);
         this.setBounds(0, 0, 700, 500);
     }
 

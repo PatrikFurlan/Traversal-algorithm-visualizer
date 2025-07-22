@@ -3,11 +3,14 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
 
 public class Node extends JComponent {
 
     private int x;
     private int y;
+
+    private ArrayList<Edge> connections = new ArrayList<>();
 
     private int clickedX;
     private int clickedY;
@@ -47,7 +50,12 @@ public class Node extends JComponent {
                     setXCoord(newX + RANGE_X / 2);
                     setYCoord(newY + RANGE_Y / 2);
 
+                    for (Edge eg : connections) {
+                        eg.repaint();
+                    }
+
                     hitbox = new Rectangle(x - RANGE_X / 2, y - RANGE_Y / 2, RANGE_X, RANGE_Y);
+
 
                     repaint();
                 }
@@ -69,9 +77,33 @@ public class Node extends JComponent {
 
                     isActive(true); // Adds the red color
                     GraphPanel.edgeNodes.add(Node.this);
-                    gp.checkLinkable();
 
-                    System.out.println(GraphPanel.edgeNodes);
+                    // TODO: When linking nodes together with edges add the edges to the connections list and update the edges. I predict the edges will follow the dragging node if I just call the Edge.repaint() function on all Edges connected to the node.
+
+                    if (gp.checkLinkable() != null) {
+                        Edge eg = gp.checkLinkable();
+
+                        boolean duplicate = false;
+                        for (Edge existing : eg.getN1().connections) {
+                            if (
+                                    (existing.getN1() == eg.getN2() && existing.getN2() == eg.getN1()) ||
+                                            (existing.getN1() == eg.getN1() && existing.getN2() == eg.getN2())
+                            ) {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+
+                        if (!duplicate) {
+                            eg.getN1().connections.add(eg);
+                            eg.getN2().connections.add(eg);
+                            GraphPanel.edgeNodes.clear();
+                            System.out.println(eg.getN1() + ":  " + connections + " _________ " + eg.getN2() + ": " + connections);
+                        } else {
+                            System.out.println(eg.getN1() + ":  " + connections + " _________ " + eg.getN2() + ": " + connections);
+                            GraphPanel.edgeNodes.clear();
+                        }
+                    }
                 }
             }
         };
@@ -147,6 +179,6 @@ public class Node extends JComponent {
 
     @Override
     public String toString() {
-        return String.format("(%d, %d)", x, y);
+        return String.format("%s (%d, %d)", nodeLetter, x, y);
     }
 }

@@ -20,6 +20,14 @@ public class Edge extends JComponent {
         g2d.drawLine(n1.getXCoord(), n1.getYCoord(), n2.getXCoord(), n2.getYCoord());
     }
 
+    public Node getN1() {
+        return n1;
+    }
+
+    public Node getN2() {
+        return n2;
+    }
+
     @Override
     public String toString() {
         return String.format("%s - %s", n1.getNodeLetter(), n2.getNodeLetter());

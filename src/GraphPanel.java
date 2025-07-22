@@ -24,8 +24,6 @@ public class GraphPanel extends JPanel {
                     Node n = new Node(e.getX(), e.getY(), GraphPanel.this);
                     nodes.add(n);
 
-                    System.out.println(nodes);
-
                     repaint();
                     add(n);
                     n.repaint();
@@ -34,17 +32,20 @@ public class GraphPanel extends JPanel {
         });
     }
 
-    public void checkLinkable() {
+    public Edge checkLinkable() {
         if (edgeNodes.size() == 2) {
             Edge ed = new Edge(edgeNodes);
 
             add(ed);
-            edgeNodes.clear();
 
             for (Node n : nodes) n.isActive(false);
 
             ed.repaint();
+
+            return ed;
         }
+
+        return null;
     }
 
     public boolean onNode(Node n, int x, int y) {

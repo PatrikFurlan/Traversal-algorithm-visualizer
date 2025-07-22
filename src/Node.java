@@ -4,6 +4,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Node extends JComponent {
 
@@ -50,12 +51,9 @@ public class Node extends JComponent {
                     setXCoord(newX + RANGE_X / 2);
                     setYCoord(newY + RANGE_Y / 2);
 
-                    for (Edge eg : connections) {
-                        eg.repaint();
-                    }
+                    for (Edge eg : connections) { eg.repaint(); }
 
                     hitbox = new Rectangle(x - RANGE_X / 2, y - RANGE_Y / 2, RANGE_X, RANGE_Y);
-
 
                     repaint();
                 }
@@ -66,19 +64,12 @@ public class Node extends JComponent {
                 clickedX = 0;
                 clickedY = 0;
 
-                // TODO: When right-clicking on a node you have to add the connecting node to the connection array of the node. Every node keeps a log of all of its connections (((( TRY MAYBE HAVING A CENTRALIZED MAP TO STORE CONNECTIONS INSTEAD OF INDIVIDUAL OBJECT STORING THEM ))))
-                // When right-clicking on a node you have to somehow pass the clicked node Object to the GraphPanel class so it can create the edge, display it and add the connection to the hashmap.
-                // Before deciding on a data structure you want to hold your nodes check which are used for algorithms like Dijkstra, BFS, DFS ...
-                // When coloring the selected node loop through all nodes and check if any are "active" if a single node is active then dont color subsequent nodes. If none are active color the recently clicked one.
-
-                // TODO: If a node becomes active you add it to a static ArrayList inside of GraphPanel which constantly check if there are atleast 2 active nodes. If the ArrayList size is 2 then you draw an edge between those two nodes
-
                 if (SwingUtilities.isRightMouseButton(e)) {
 
-                    isActive(true); // Adds the red color
+                    isActive(true);
                     GraphPanel.edgeNodes.add(Node.this);
 
-                    // TODO: When linking nodes together with edges add the edges to the connections list and update the edges. I predict the edges will follow the dragging node if I just call the Edge.repaint() function on all Edges connected to the node.
+                    repaint();
 
                     if (gp.checkLinkable() != null) {
                         Edge eg = gp.checkLinkable();
@@ -95,12 +86,21 @@ public class Node extends JComponent {
                         }
 
                         if (!duplicate) {
+
+                            // TODO: Consider adding edges to a data structure alongside connecting nodes to simplify edge coloring in the future when implemening various algorithms
                             eg.getN1().connections.add(eg);
                             eg.getN2().connections.add(eg);
+
+                            eg.getN1().isActive(false);
+                            eg.getN2().isActive(false);
+
+                            GraphPanel.graphData.computeIfAbsent(eg.getN1(), k -> new HashSet<>()).add(eg.getN2());
+                            GraphPanel.graphData.computeIfAbsent(eg.getN2(), k -> new HashSet<>()).add(eg.getN1());
+
+                            System.out.println(GraphPanel.graphData);
+
                             GraphPanel.edgeNodes.clear();
-                            System.out.println(eg.getN1() + ":  " + connections + " _________ " + eg.getN2() + ": " + connections);
                         } else {
-                            System.out.println(eg.getN1() + ":  " + connections + " _________ " + eg.getN2() + ": " + connections);
                             GraphPanel.edgeNodes.clear();
                         }
                     }
@@ -126,7 +126,6 @@ public class Node extends JComponent {
 
         g2d.setColor(Color.BLACK);
         g2d.drawString(nodeLetter, drawX - 7, drawY - 7);
-        //g2d.drawRect(0, 0, RANGE_X, RANGE_Y);
 
         Ellipse2D.Double node = new Ellipse2D.Double(drawX - 5, drawY - 5, 10.0, 10.0);
         g2d.setColor(nodeColor);
@@ -179,6 +178,6 @@ public class Node extends JComponent {
 
     @Override
     public String toString() {
-        return String.format("%s (%d, %d)", nodeLetter, x, y);
+        return String.format("%s", nodeLetter);
     }
 }

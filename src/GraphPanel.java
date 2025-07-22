@@ -1,16 +1,15 @@
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 
 public class GraphPanel extends JPanel {
 
     public static String nodeLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static ArrayList<Node> nodes = new ArrayList<>();
-    public static HashMap<Node, List<Node>> edges = new HashMap<>(); //map with node name and connections to it eg. A: BCDE
+    public static HashMap<Node, HashSet<Node>> graphData = new HashMap<>(); //map with node name and connections to it eg. A: BCDE
 
     public static ArrayList<Node> edgeNodes = new ArrayList<>();
 
@@ -34,11 +33,15 @@ public class GraphPanel extends JPanel {
 
     public Edge checkLinkable() {
         if (edgeNodes.size() == 2) {
+            if (edgeNodes.get(0) == edgeNodes.get(1)) {
+                System.out.println("Loopback connection prevented.");
+                edgeNodes.clear();
+                return null;
+            }
+
             Edge ed = new Edge(edgeNodes);
 
             add(ed);
-
-            for (Node n : nodes) n.isActive(false);
 
             ed.repaint();
 

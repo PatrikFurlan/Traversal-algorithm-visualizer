@@ -5,13 +5,15 @@ import java.util.List;
 public class GraphModel {
 
     private ArrayList<Node> nodes;
-    //private ArrayList<Edge> edges;
+    private ArrayList<Edge> edges;
 
     //Add observers of the GraphModel class - (GraphView for now)
     private List<GraphModelListener> observers = new ArrayList<>();
 
     public GraphModel() {
         this.nodes = new ArrayList<>();
+        this.edges = new ArrayList<>();
+        notifyObservers();
     }
 
     public void addNode(Node n) {
@@ -19,8 +21,17 @@ public class GraphModel {
         notifyObservers();
     }
 
+    public void addEdge(Edge e){
+        edges.add(e);
+        notifyObservers();
+    }
+
     public ArrayList<Node> getNodes() {
         return this.nodes;
+    }
+
+    public ArrayList<Edge> getEdges() {
+        return this.edges;
     }
 
     //Observer methods

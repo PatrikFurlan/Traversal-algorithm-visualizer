@@ -1,13 +1,8 @@
-import javax.swing.*;
-
 public class Main {
     public static void main(String[] args) {
+        GraphModel model = new GraphModel();
+        GraphView view = new GraphView();
 
-        JFrame f = new JFrame();
-
-        f.add(new GraphPanel());
-        f.setBounds(300, 300, 700, 500);
-        f.setVisible(true);
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        GraphController controller = new GraphController(model, view);
     }
 }

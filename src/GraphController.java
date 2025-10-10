@@ -45,7 +45,6 @@ public class GraphController {
 
                             Edge edge = new Edge(firstNode, clickedNode);
                             model.addEdge(edge);
-                            System.out.println(model.getEdges());
 
                             firstNode = null; // Reset firstNode for next time
                         }

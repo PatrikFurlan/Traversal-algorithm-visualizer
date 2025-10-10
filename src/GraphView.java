@@ -37,6 +37,7 @@ public class GraphView extends JPanel implements GraphModelListener {
                 g.setColor(new Color(255, 0, 0));
             }
             g.fillOval((int) n.getX() - 5, (int) n.getY() - 5, 10, 10);
+            g.drawString(n.getLabel(), (int) n.getX() - 15, (int) n.getY());
         }
 
         g.setColor(new Color(0, 0, 0));

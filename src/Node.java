@@ -1,14 +1,21 @@
-public class Node {
+public class Node{
 
-    private static int id = 0;
+    private static int nodesDropped = -1;
+    private static String abc = "ABCDEFGHIJKLMNOPRSTUVXYZ";
+
+    private int id;
+    private String label = "";
     private double x;
     private double y;
     private boolean selected;
 
     public Node(double x, double y) {
-        id += 1;
+        this.id = nodesDropped + 1;
+        this.label = "" + abc.charAt(this.id);
         this.x = x;
         this.y = y;
+
+        nodesDropped++;
     }
 
     public double getX() {
@@ -27,8 +34,12 @@ public class Node {
         this.y = y;
     }
 
-    public static int getId() {
+    public int getId() {
         return id;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     public boolean isSelected() {
@@ -37,5 +48,9 @@ public class Node {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public String toString() {
+        return getLabel() + "";
     }
 }

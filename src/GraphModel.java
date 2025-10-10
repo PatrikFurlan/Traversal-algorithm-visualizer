@@ -1,8 +1,8 @@
+import com.sun.source.tree.Tree;
+
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class GraphModel {
 
@@ -10,7 +10,7 @@ public class GraphModel {
     private ArrayList<Edge> edges;
 
     // Main data structure for use in graph algorithms
-    private Map<Node, List<Edge>> neighbourList = new HashMap<>();
+    private Map<Node, Set<Node>> neighbourList = new HashMap<>();
 
     // Add observers of the GraphModel class - (GraphView for now)
     private List<GraphModelListener> observers = new ArrayList<>();
@@ -23,11 +23,31 @@ public class GraphModel {
 
     public void addNode(Node n) {
         nodes.add(n);
+        neighbourList.put(n, new TreeSet<Node>(new Comparator<Node>() { // MOGOCE CELO NE RABI BITI UREJEN SET !!!!
+            @Override
+            public int compare(Node o1, Node o2) {
+                return Integer.compare(o1.getId(), o2.getId());
+            }
+        }));
+
         notifyObservers();
     }
 
     public void addEdge(Edge e){
         edges.add(e);
+
+        Node from = e.getFrom();
+        Node to = e.getTo();
+
+        Set<Node> neighbours = neighbourList.get(from);
+        neighbours.add(to);
+        neighbourList.put(from, neighbours);
+
+        neighbours = neighbourList.get(to);
+        neighbours.add(from);
+        neighbourList.put(to, neighbours);
+
+        System.out.println(neighbourList);
         notifyObservers();
     }
 

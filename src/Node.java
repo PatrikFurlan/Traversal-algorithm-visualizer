@@ -1,10 +1,12 @@
 public class Node {
 
+    private static int id = 0;
     private double x;
     private double y;
     private boolean selected;
 
     public Node(double x, double y) {
+        id += 1;
         this.x = x;
         this.y = y;
     }
@@ -23,6 +25,10 @@ public class Node {
 
     public void setY(double y) {
         this.y = y;
+    }
+
+    public static int getId() {
+        return id;
     }
 
     public boolean isSelected() {

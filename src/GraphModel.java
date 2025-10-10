@@ -1,13 +1,18 @@
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GraphModel {
 
     private ArrayList<Node> nodes;
     private ArrayList<Edge> edges;
 
-    //Add observers of the GraphModel class - (GraphView for now)
+    // Main data structure for use in graph algorithms
+    private Map<Node, List<Edge>> neighbourList = new HashMap<>();
+
+    // Add observers of the GraphModel class - (GraphView for now)
     private List<GraphModelListener> observers = new ArrayList<>();
 
     public GraphModel() {

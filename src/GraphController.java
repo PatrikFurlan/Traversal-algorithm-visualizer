@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 public class GraphController {
 
@@ -36,7 +37,12 @@ public class GraphController {
                     if(clickedNode != null) {
                         if(firstNode == null) {
                             firstNode = clickedNode;
+                            firstNode.setSelected(true);
+                            view.repaint();
+
                         } else if(firstNode != clickedNode){
+                            firstNode.setSelected(false);
+
                             Edge edge = new Edge(firstNode, clickedNode);
                             model.addEdge(edge);
                             System.out.println(model.getEdges());
@@ -44,13 +50,20 @@ public class GraphController {
                             firstNode = null; // Reset firstNode for next time
                         }
                     } else {
+                        if (firstNode != null) {
+                            firstNode.setSelected(false);
+                            view.repaint();
+                        }
                         firstNode = null;
                     }
 
                 }
 
             }
+
+
         });
+
     }
 
     private Node getClickedNode(int x, int y) {

@@ -30,10 +30,16 @@ public class GraphView extends JPanel implements GraphModelListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         for (Node n : pendingNodes) {
+            g.setColor(new Color(0, 0, 0));
+            if (n.isSelected()) {
+                g.setColor(new Color(255, 0, 0));
+            }
             g.fillOval((int) n.getX() - 5, (int) n.getY() - 5, 10, 10);
         }
 
+        g.setColor(new Color(0, 0, 0));
         if(pendingEdges != null) {
             for (Edge e : pendingEdges) {
                 int x1 = (int) e.getFrom().getX();

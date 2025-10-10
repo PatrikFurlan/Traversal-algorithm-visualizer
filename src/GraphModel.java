@@ -44,7 +44,7 @@ public class GraphModel {
         this.observers.remove(gml);
     }
 
-    private void notifyObservers() {
+    protected void notifyObservers() {
         for(GraphModelListener gml : observers) {
             gml.modelChanged();
         }

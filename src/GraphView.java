@@ -1,12 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GraphView extends JPanel implements GraphModelListener {
 
     private JFrame f;
+    private int radius;
+
     private ArrayList<Node> pendingNodes = new ArrayList<>();
     private ArrayList<Edge> pendingEdges = new ArrayList<>();
+    private Set<Node> pendingAvailable = new HashSet<>();
+
+    // Ghost edge data
+    private Node ghostEdgeStart = null;
+    private int ghostX = 0;
+    private int ghostY = 0;
 
     public GraphView() {
         f = new JFrame();
@@ -24,6 +34,18 @@ public class GraphView extends JPanel implements GraphModelListener {
 
     public void addEdges(ArrayList<Edge> edges) {
         pendingEdges = edges;
+        repaint();
+    }
+
+    public void drawGhostEdge(Node n, int x, int y) {
+        ghostEdgeStart = n;
+        ghostX = x;
+        ghostY = y;
+        repaint();
+    }
+
+    public void highlightAvailable(Set<Node> available) {
+        pendingAvailable = available;
         repaint();
     }
 
@@ -52,8 +74,28 @@ public class GraphView extends JPanel implements GraphModelListener {
                 g.drawLine(x1, y1, x2, y2);
             }
         }
+
+        // Draw ghost edge
+        if (ghostEdgeStart != null) {
+            g.drawLine((int) ghostEdgeStart.getX(), (int) ghostEdgeStart.getY(), ghostX, ghostY);
+        }
+
+        for (Node n : pendingAvailable) {
+            g.drawRect((int) n.getX() - radius / 2, (int) n.getY() - radius / 2, radius, radius);
+        }
     }
 
+    public JFrame getF() {
+        return f;
+    }
+
+    public void setGhostEdgeStart(Node ghostEdgeStart) {
+        this.ghostEdgeStart = ghostEdgeStart;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
 
     //Observer mechanism methods
 

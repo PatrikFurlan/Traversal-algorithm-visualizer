@@ -59,7 +59,11 @@ public class GraphModel {
         return this.edges;
     }
 
-    //Observer methods
+    public Map<Node, Set<Node>> getNeighbourList() {
+        return neighbourList;
+    }
+
+    // Observer methods
 
     public void addObserver(GraphModelListener gml) {
         this.observers.add(gml);

@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -11,15 +13,17 @@ public class GraphController {
 
     private final GraphModel model;
     private final GraphView view;
+    private final SimulationPanel simPanel;
 
     private Node firstNode = null;
     private Node draggedNode = null;
 
     private int radius = 30;
 
-    public GraphController(GraphModel model, GraphView view) {
+    public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel) {
         this.model = model;
         this.view = view;
+        this.simPanel = simPanel;
 
         view.setRadius(this.radius);
 
@@ -33,6 +37,7 @@ public class GraphController {
 
         addMouseListeners();
         addMouseMotionListeners();
+        addSimulationPanelListeners();
     }
 
     /* -------------------- EVENT HANDLER SETUP -------------------- */
@@ -143,6 +148,7 @@ public class GraphController {
             view.repaint();
         }
         firstNode = null;
+        highlightAvailableNodes(null);
         view.setGhostEdgeStart(null);
     }
 
@@ -175,5 +181,30 @@ public class GraphController {
         } else {
             view.highlightAvailable(new HashSet<>());
         }
+    }
+
+    /* -------------------- SIMULATION PANEL CONTROLS -------------------- */
+
+    private void addSimulationPanelListeners() {
+        simPanel.addStartBtnListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Start");
+            }
+        });
+
+        simPanel.addClearListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearGraph();
+            }
+        });
+    }
+
+    public void clearGraph() {
+        model.getNeighbourList().clear();
+        model.getNodes().clear();
+        model.getEdges().clear();
+        model.notifyObservers();
     }
 }

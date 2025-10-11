@@ -19,12 +19,7 @@ public class GraphView extends JPanel implements GraphModelListener {
     private int ghostY = 0;
 
     public GraphView() {
-        f = new JFrame();
 
-        f.add(this);
-        f.setSize(800, 500);
-        f.setVisible(true);
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public void addNodes(ArrayList<Node> nodes) {
@@ -62,7 +57,7 @@ public class GraphView extends JPanel implements GraphModelListener {
             g.drawString(n.getLabel(), (int) n.getX() - 15, (int) n.getY());
         }
 
-        g.setColor(new Color(0, 0, 0));
+        g.setColor(Color.BLACK);
         if(pendingEdges != null) {
             for (Edge e : pendingEdges) {
                 int x1 = (int) e.getFrom().getX();
@@ -83,10 +78,8 @@ public class GraphView extends JPanel implements GraphModelListener {
         for (Node n : pendingAvailable) {
             g.drawRect((int) n.getX() - radius / 2, (int) n.getY() - radius / 2, radius, radius);
         }
-    }
 
-    public JFrame getF() {
-        return f;
+        g.setColor(Color.BLACK);
     }
 
     public void setGhostEdgeStart(Node ghostEdgeStart) {

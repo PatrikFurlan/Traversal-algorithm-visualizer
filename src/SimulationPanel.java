@@ -92,4 +92,25 @@ public class SimulationPanel extends JPanel {
         clearBtn.addActionListener(l);
     }
 
+    // ----- Content getters -----
+    public String getFromText() {
+        return this.fromField.getText().trim();
+    }
+
+    public String getToText() {
+        return this.toField.getText().trim();
+    }
+
+    public String getAlgorithm() {
+        return (String) algoDropdown.getSelectedItem();
+    }
+
+    public JButton getStartBtn() {
+        return startBtn;
+    }
+
+
+
+
+
 }

@@ -4,10 +4,11 @@ import java.awt.*;
 public class Main {
     public static void main(String[] args) {
         GraphModel model = new GraphModel();
-        GraphView view = new GraphView();
+                GraphView view = new GraphView();
         SimulationPanel simPanel = new SimulationPanel();
+        AlgorithmCompute algoCompute = new AlgorithmCompute();
 
-        GraphController controller = new GraphController(model, view, simPanel);
+        GraphController controller = new GraphController(model, view, simPanel, algoCompute);
 
 
         JFrame f = new JFrame();

@@ -1,29 +1,34 @@
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GraphController {
 
     private final GraphModel model;
+
+    // View layer
     private final GraphView view;
     private final SimulationPanel simPanel;
+
+    // Control layer
+    private final AlgorithmCompute algoCompute;
 
     private Node firstNode = null;
     private Node draggedNode = null;
 
     private int radius = 30;
+    private boolean simulation = false;
+    private int simulationStep = 1;
+    private ArrayList<Node> algorithmPath;
 
-    public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel) {
+    public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel, AlgorithmCompute algoCompute) {
         this.model = model;
         this.view = view;
         this.simPanel = simPanel;
+        this.algoCompute = algoCompute;
 
         view.setRadius(this.radius);
 
@@ -62,12 +67,14 @@ public class GraphController {
                     } else {
                         // Only create new node if released on empty space
                         Node clicked = getClickedNode(e.getX(), e.getY());
-                        if (clicked == null) {
+                        if (clicked == null && !simulation) {
                             handleCreateNode(e);
                         }
                     }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    handleRightClick(e);
+                    if (!simulation) {
+                        handleRightClick(e);
+                    }
                 }
             }
         });
@@ -90,17 +97,21 @@ public class GraphController {
     /* -------------------- EVENT LOGIC -------------------- */
 
     private void handleCreateNode(MouseEvent e) {
-        Node n = new Node(e.getX(), e.getY());
-        model.addNode(n);
+        if (Node.getNodesDropped() < 26) {
+            Node n = new Node(e.getX(), e.getY());
+            model.addNode(n);
+        }
     }
 
     private void handleRightClick(MouseEvent e) {
-        Node clickedNode = getClickedNode(e.getX(), e.getY());
+        if (!simulation) {
+            Node clickedNode = getClickedNode(e.getX(), e.getY());
 
-        if (clickedNode != null) {
-            handleNodeClick(clickedNode);
-        } else {
-            handleEmptySpaceClick();
+            if (clickedNode != null) {
+                handleNodeClick(clickedNode);
+            } else {
+                handleEmptySpaceClick();
+            }
         }
     }
 
@@ -189,7 +200,9 @@ public class GraphController {
         simPanel.addStartBtnListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Start");
+                if (!simulation) startSimulation();
+                else nextSimulationStep();
+
             }
         });
 
@@ -202,9 +215,56 @@ public class GraphController {
     }
 
     public void clearGraph() {
+        simulation = false;
+
+        simulationStep = 1;
+        simPanel.getStartBtn().setText("Start");
+        unselectNodes();
+
         model.getNeighbourList().clear();
+        Node.setNodesDropped(0);
         model.getNodes().clear();
         model.getEdges().clear();
         model.notifyObservers();
+        view.repaint();
+    }
+
+    public void startSimulation() {
+        simulation = true;
+
+        Map<Node, Set<Node>> neighbourList = model.getNeighbourList();
+        String from = simPanel.getFromText().toUpperCase();
+        String to = simPanel.getToText().toUpperCase();
+        String algorithm = simPanel.getAlgorithm();
+
+        algorithmPath = algoCompute.simulate(algorithm, from, to, neighbourList);
+        System.out.println(algorithmPath);
+        nextSimulationStep();
+    }
+
+    public void nextSimulationStep() {
+        if (simulationStep <= algorithmPath.size()) {
+            simPanel.getStartBtn().setText(String.format("Step (%d / %d)", simulationStep, algorithmPath.size()));
+
+            // Color selected node in view
+            algorithmPath.get(simulationStep - 1).setSelected(true);
+
+            simulationStep++;
+            view.repaint();
+        } else {
+            unselectNodes();
+
+            simulation = false;
+            algorithmPath = new ArrayList<>();
+            simulationStep = 1;
+            simPanel.getStartBtn().setText("Start");
+        }
+    }
+
+    private void unselectNodes() {
+        for (Node n : model.getNodes()) {
+            n.setSelected(false); // Unselect all nodes after algorithm is done
+            view.repaint();
+        }
     }
 }

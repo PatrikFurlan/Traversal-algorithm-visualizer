@@ -1,7 +1,7 @@
-public class Node{
+public class Node {
 
-    private static int nodesDropped = -1;
-    private static String abc = "ABCDEFGHIJKLMNOPRSTUVXYZ";
+    private static int nodesDropped = 0;
+    private static String abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private int id;
     private String label = "";
@@ -11,7 +11,8 @@ public class Node{
 
     public Node(double x, double y) {
         this.id = nodesDropped + 1;
-        this.label = "" + abc.charAt(this.id);
+
+        this.label = "" + abc.charAt(this.id - 1);
         this.x = x;
         this.y = y;
 
@@ -40,6 +41,14 @@ public class Node{
 
     public String getLabel() {
         return label;
+    }
+
+    public static int getNodesDropped() {
+        return nodesDropped;
+    }
+
+    public static void setNodesDropped(int n) {
+        nodesDropped = n;
     }
 
     public boolean isSelected() {

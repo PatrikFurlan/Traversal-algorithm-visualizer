@@ -23,6 +23,7 @@ public class GraphController {
     private boolean simulation = false;
     private int simulationStep = 1;
     private ArrayList<Node> algorithmPath;
+    private ArrayList<Node> edgeNodes = new ArrayList<>();
 
     public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel, AlgorithmCompute algoCompute) {
         this.model = model;
@@ -220,7 +221,9 @@ public class GraphController {
         simulationStep = 1;
         simPanel.getStartBtn().setText("Start");
         unselectNodes();
+        unselectEdges();
 
+        edgeNodes = new ArrayList<>();
         model.getNeighbourList().clear();
         Node.setNodesDropped(0);
         model.getNodes().clear();
@@ -249,15 +252,40 @@ public class GraphController {
             // Color selected node in view
             algorithmPath.get(simulationStep - 1).setSelected(true);
 
+            // Color selected edges
+            edgeNodes.add(algorithmPath.get(simulationStep - 1));
+
+            if (simulationStep >= 2) {
+                Node from = edgeNodes.get(0);
+                Node to = edgeNodes.get(1);
+                selectEdge(from, to);
+
+                edgeNodes.remove(from);
+            }
             simulationStep++;
             view.repaint();
         } else {
             unselectNodes();
+            unselectEdges();
 
+            edgeNodes = new ArrayList<>();
             simulation = false;
             algorithmPath = new ArrayList<>();
             simulationStep = 1;
             simPanel.getStartBtn().setText("Start");
+        }
+    }
+
+    private void selectEdge(Node from, Node to) {
+        for (Edge e : model.getEdges()) {
+            if (e.getFrom().equals(from) && e.getTo().equals(to) || e.getFrom().equals(to) && e.getTo().equals(from)) {
+                e.setSelected(true);
+            }
+        }
+    }
+    private void unselectEdges() {
+        for (Edge e : model.getEdges()) {
+            e.setSelected(false);
         }
     }
 

@@ -60,6 +60,13 @@ public class GraphView extends JPanel implements GraphModelListener {
         g.setColor(Color.BLACK);
         if(pendingEdges != null) {
             for (Edge e : pendingEdges) {
+                if (e.isSelected()) {
+                    g.setColor(new Color(255, 0, 0));
+                    ((Graphics2D) g).setStroke(new BasicStroke(2));
+                } else {
+                    g.setColor(Color.BLACK);
+                    ((Graphics2D) g).setStroke(new BasicStroke(1));
+                }
                 int x1 = (int) e.getFrom().getX();
                 int y1 = (int) e.getFrom().getY();
 
@@ -69,6 +76,7 @@ public class GraphView extends JPanel implements GraphModelListener {
                 g.drawLine(x1, y1, x2, y2);
             }
         }
+        g.setColor(Color.BLACK);
 
         // Draw ghost edge
         if (ghostEdgeStart != null) {

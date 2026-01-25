@@ -109,8 +109,4 @@ public class SimulationPanel extends JPanel {
         return startBtn;
     }
 
-
-
-
-
 }

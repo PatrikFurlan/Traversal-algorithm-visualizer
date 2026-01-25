@@ -1,8 +1,10 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class GraphController {
@@ -23,7 +25,12 @@ public class GraphController {
     private boolean simulation = false;
     private int simulationStep = 1;
     private ArrayList<Node> algorithmPath;
-    private ArrayList<Node> edgeNodes = new ArrayList<>();
+    private ArrayList<Node> algorithmVisited;
+    private ArrayList<Node> edgeNodes = new ArrayList<>(); // A tuple holding both edge nodes (from, to)
+
+    // Algorithm backtracking jazz
+    private Node branchEnd = null; // Starting node of an alternative path branch in DFS and others (when ready)
+    private Color branchColor = Color.RED;
 
     public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel, AlgorithmCompute algoCompute) {
         this.model = model;
@@ -135,13 +142,13 @@ public class GraphController {
     private void handleNodeClick(Node clickedNode) {
         if (firstNode == null) {
             firstNode = clickedNode;
-            firstNode.setSelected(true);
+            firstNode.setSelected(true, Color.RED);
 
             highlightAvailableNodes(firstNode);
 
             view.repaint();
         } else if (firstNode != clickedNode) {
-            firstNode.setSelected(false);
+            firstNode.setSelected(false, Color.BLACK);
 
             Edge edge = new Edge(firstNode, clickedNode);
             model.addEdge(edge);
@@ -156,7 +163,7 @@ public class GraphController {
 
     private void handleEmptySpaceClick() {
         if (firstNode != null) {
-            firstNode.setSelected(false);
+            firstNode.setSelected(false, Color.BLACK);
             view.repaint();
         }
         firstNode = null;
@@ -240,33 +247,100 @@ public class GraphController {
         String to = simPanel.getToText().toUpperCase();
         String algorithm = simPanel.getAlgorithm();
 
-        algorithmPath = algoCompute.simulate(algorithm, from, to, neighbourList);
+        ArrayList<ArrayList<Node>> algorithmTuple = algoCompute.simulate(algorithm, from, to, neighbourList);
+
+        algorithmPath = algorithmTuple.get(0);      // Unpackage path and visited from the algorithms tuple
+        algorithmVisited = algorithmTuple.get(1);
+
         System.out.println(algorithmPath);
         nextSimulationStep();
     }
 
     public void nextSimulationStep() {
-        if (simulationStep <= algorithmPath.size()) {
-            simPanel.getStartBtn().setText(String.format("Step (%d / %d)", simulationStep, algorithmPath.size()));
+//        if (simulationStep <= algorithmPath.size()) {
+//            simPanel.getStartBtn().setText(String.format("Step (%d / %d)", simulationStep, algorithmPath.size()));
+//
+//            // Color selected node in view
+//            algorithmPath.get(simulationStep - 1).setSelected(true);
+//
+//            // Color selected edges
+//            edgeNodes.add(algorithmPath.get(simulationStep - 1));
+//
+//            if (simulationStep >= 2) {
+//                Node from = edgeNodes.get(0);
+//                Node to = edgeNodes.get(1);
+//                selectEdge(from, to);
+//
+//                edgeNodes.remove(from);
+//            }
+//            simulationStep++;
+//            view.repaint();
+//        } else {
+//            unselectNodes();
+//            unselectEdges();
+//
+//            edgeNodes = new ArrayList<>();
+//            simulation = false;
+//            algorithmPath = new ArrayList<>();
+//            simulationStep = 1;
+//            simPanel.getStartBtn().setText("Start");
+//        }
 
-            // Color selected node in view
-            algorithmPath.get(simulationStep - 1).setSelected(true);
+        if (simulationStep <= algorithmVisited.size()) {
+            simPanel.getStartBtn().setText(String.format("Step (%d / %d)", simulationStep, algorithmVisited.size()));
+
+
+            // Color selected node in view RED if its part of the end path or BLUE if it strays from the path and backtracks later on
+//            Node n = algorithmVisited.get(simulationStep - 1);
+//            if (algorithmPath.contains(n)) {
+//                n.setSelected(true, Color.RED);
+//            } else n.setSelected(true, Color.BLUE);
+
+            /*TODO nodes that arent on the final path and are backtracked need to be reset back to BLACK after backtracked. Same goes for edges
+               When simulaationStep index is on a node that isnt in the path array, note the previous node (simulationStep - 1) and draw every edge and node BLUE from then on.
+               When the next node is eventually the same as the the last one before leaving the path, turn all BLUE colored edges and nodes back to BLACK.
+               Track the alternative branch of the path within a seperate array of edges and nodes?
+            */
+
+            Node n = algorithmVisited.get(simulationStep - 1);
+
+            if (n == branchEnd) {
+                unselectNodes(branchColor);
+                unselectEdges(branchColor);
+
+                branchEnd = null; // Reset branch staring node when it converges back into the main branch
+                branchColor = Color.RED;
+            }
+
+            // Detect diverging branch
+            if (!algorithmPath.contains(n) && branchEnd == null) {
+                branchEnd = algorithmVisited.get(simulationStep - 2);
+                branchColor = Color.BLUE;
+            }
 
             // Color selected edges
-            edgeNodes.add(algorithmPath.get(simulationStep - 1));
+            edgeNodes.add(algorithmVisited.get(simulationStep - 1));
 
-            if (simulationStep >= 2) {
+            if (simulationStep > 1) {
                 Node from = edgeNodes.get(0);
                 Node to = edgeNodes.get(1);
-                selectEdge(from, to);
 
+                if (from.equals(branchEnd)) {
+                    selectEdge(from, to, branchColor);
+                }
                 edgeNodes.remove(from);
             }
+
+            n.setSelected(true, branchColor);
+
             simulationStep++;
             view.repaint();
         } else {
             unselectNodes();
             unselectEdges();
+
+            branchEnd = null; // Reset branch color and start when branches converge
+            branchColor = Color.RED;
 
             edgeNodes = new ArrayList<>();
             simulation = false;
@@ -279,19 +353,45 @@ public class GraphController {
     private void selectEdge(Node from, Node to) {
         for (Edge e : model.getEdges()) {
             if (e.getFrom().equals(from) && e.getTo().equals(to) || e.getFrom().equals(to) && e.getTo().equals(from)) {
-                e.setSelected(true);
+                e.setSelected(true, Color.RED);
             }
         }
     }
+
+    private void selectEdge(Node from, Node to, Color color) {
+        for (Edge e : model.getEdges()) {
+            if (e.getFrom().equals(from) && e.getTo().equals(to) || e.getFrom().equals(to) && e.getTo().equals(from)) {
+                e.setSelected(true, color);
+            }
+        }
+    }
+
     private void unselectEdges() {
         for (Edge e : model.getEdges()) {
-            e.setSelected(false);
+            e.setSelected(false, Color.BLACK);
+        }
+    }
+
+    private void unselectEdges(Color color) {
+        for (Edge e : model.getEdges()) {
+            if (e.getColor().equals(color)) {
+                e.setSelected(false, Color.BLACK);
+            }
         }
     }
 
     private void unselectNodes() {
         for (Node n : model.getNodes()) {
-            n.setSelected(false); // Unselect all nodes after algorithm is done
+            n.setSelected(false, Color.BLACK); // Unselect all nodes after algorithm is done (color black)
+            view.repaint();
+        }
+    }
+
+    private void unselectNodes(Color color) {
+        for (Node n : model.getNodes()) {
+            if (n.getColor().equals(color)){
+                n.setSelected(false, Color.BLACK); // Unselect nodes of a specified color
+            }
             view.repaint();
         }
     }

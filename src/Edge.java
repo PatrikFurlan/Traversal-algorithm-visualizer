@@ -1,7 +1,10 @@
+import java.awt.*;
+
 public class Edge {
     private Node from;
     private Node to;
     private boolean selected = false;
+    private Color color = Color.BLACK;
 
     public Edge(Node from, Node to) {
         this.from = from;
@@ -24,12 +27,14 @@ public class Edge {
         this.to = to;
     }
 
-    public void setSelected(boolean b) {
+    public void setSelected(boolean b, Color color) {
         selected = b;
+        this.color = color;
     }
     public boolean isSelected() {
         return selected;
     }
+    public Color getColor() { return this.color; }
     public String toString() {
         return String.format("%s - %s", from, to);
     }

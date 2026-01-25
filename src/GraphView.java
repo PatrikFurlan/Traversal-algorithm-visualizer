@@ -51,7 +51,7 @@ public class GraphView extends JPanel implements GraphModelListener {
         for (Node n : pendingNodes) {
             g.setColor(new Color(0, 0, 0));
             if (n.isSelected()) {
-                g.setColor(new Color(255, 0, 0));
+                g.setColor(n.getColor());
             }
             g.fillOval((int) n.getX() - 5, (int) n.getY() - 5, 10, 10);
             g.drawString(n.getLabel(), (int) n.getX() - 15, (int) n.getY());
@@ -61,7 +61,7 @@ public class GraphView extends JPanel implements GraphModelListener {
         if(pendingEdges != null) {
             for (Edge e : pendingEdges) {
                 if (e.isSelected()) {
-                    g.setColor(new Color(255, 0, 0));
+                    g.setColor(e.getColor());
                     ((Graphics2D) g).setStroke(new BasicStroke(2));
                 } else {
                     g.setColor(Color.BLACK);

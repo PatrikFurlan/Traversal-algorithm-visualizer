@@ -1,3 +1,5 @@
+import java.awt.*;
+
 public class Node {
 
     private static int nodesDropped = 0;
@@ -8,6 +10,8 @@ public class Node {
     private double x;
     private double y;
     private boolean selected;
+    private Color color = Color.BLACK; // When selecting a node we can specify the color that GraphView will paint
+    private boolean visited = false; // Used for graph algorithms
 
     public Node(double x, double y) {
         this.id = nodesDropped + 1;
@@ -55,9 +59,12 @@ public class Node {
         return selected;
     }
 
-    public void setSelected(boolean selected) {
+    public void setSelected(boolean selected, Color color) {
         this.selected = selected;
+        this.color = color;
     }
+
+    public Color getColor() { return this.color; }
 
     public String toString() {
         return getLabel() + "";

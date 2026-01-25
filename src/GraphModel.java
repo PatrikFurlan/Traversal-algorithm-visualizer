@@ -23,13 +23,12 @@ public class GraphModel {
 
     public void addNode(Node n) {
         nodes.add(n);
-        neighbourList.put(n, new TreeSet<Node>(new Comparator<Node>() { // MOGOCE CELO NE RABI BITI UREJEN SET !!!!
+        neighbourList.put(n, new TreeSet<Node>(new Comparator<Node>() {
             @Override
             public int compare(Node o1, Node o2) {
                 return Integer.compare(o1.getId(), o2.getId());
             }
         }));
-
         notifyObservers();
     }
 
@@ -47,7 +46,6 @@ public class GraphModel {
         neighbours.add(from);
         neighbourList.put(to, neighbours);
 
-        System.out.println(neighbourList);
         notifyObservers();
     }
 

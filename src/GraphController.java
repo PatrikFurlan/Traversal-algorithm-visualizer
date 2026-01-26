@@ -31,6 +31,7 @@ public class GraphController {
     // Algorithm backtracking jazz
     private Node branchEnd = null; // Starting node of an alternative path branch in DFS and others (when ready)
     private Color branchColor = Color.RED;
+    private Stack<Node> branchNodesStack = new Stack<>();
 
     public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel, AlgorithmCompute algoCompute) {
         this.model = model;
@@ -289,49 +290,39 @@ public class GraphController {
         if (simulationStep <= algorithmVisited.size()) {
             simPanel.getStartBtn().setText(String.format("Step (%d / %d)", simulationStep, algorithmVisited.size()));
 
+            // Get current node (node on this step)
+            Node curr = algorithmVisited.get(simulationStep - 1);
+            Node prev;
 
-            // Color selected node in view RED if its part of the end path or BLUE if it strays from the path and backtracks later on
-//            Node n = algorithmVisited.get(simulationStep - 1);
-//            if (algorithmPath.contains(n)) {
-//                n.setSelected(true, Color.RED);
-//            } else n.setSelected(true, Color.BLUE);
+            boolean isOnPath = algorithmPath.contains(curr);
+            branchColor = isOnPath ? Color.RED : Color.BLUE;
 
-            /*TODO nodes that arent on the final path and are backtracked need to be reset back to BLACK after backtracked. Same goes for edges
-               When simulaationStep index is on a node that isnt in the path array, note the previous node (simulationStep - 1) and draw every edge and node BLUE from then on.
-               When the next node is eventually the same as the the last one before leaving the path, turn all BLUE colored edges and nodes back to BLACK.
-               Track the alternative branch of the path within a seperate array of edges and nodes?
-            */
+            // If the current node isnt on the final path, switch color to BLUE. (NOT STRICTLY NECESSARY FOR NOW). When current isn't on the final path, push it to the nodes stack and color it BLUE.
+            // If the stack already contains the current node, then that means that we have backtracked into it. Pop the current node and unselect it.
 
-            Node n = algorithmVisited.get(simulationStep - 1);
-
-            if (n == branchEnd) {
-                unselectNodes(branchColor);
-                unselectEdges(branchColor);
-
-                branchEnd = null; // Reset branch staring node when it converges back into the main branch
-                branchColor = Color.RED;
+            if (simulationStep >= 2) {
+               prev = algorithmVisited.get(simulationStep - 2);
             }
 
-            // Detect diverging branch
-            if (!algorithmPath.contains(n) && branchEnd == null) {
-                branchEnd = algorithmVisited.get(simulationStep - 2);
-                branchColor = Color.BLUE;
-            }
+            if (!isOnPath) {
+                if (branchNodesStack.contains(curr)) { // Backtracking
+                    branchNodesStack.pop().setSelected(false, Color.BLACK);
+                    //Unselect nodes and edges (Also pop edges)
 
-            // Color selected edges
-            edgeNodes.add(algorithmVisited.get(simulationStep - 1));
+                } else {
+                    branchNodesStack.push(curr);
+                    curr.setSelected(true, Color.BLUE);
 
-            if (simulationStep > 1) {
-                Node from = edgeNodes.get(0);
-                Node to = edgeNodes.get(1);
 
-                if (from.equals(branchEnd)) {
-                    selectEdge(from, to, branchColor);
                 }
-                edgeNodes.remove(from);
-            }
+            } else {
+                // When you converge back into a branch clear stack and unselect all BLUE nodes
+                // TODO This is not optimal since the last element still stays in the stack. This should be resolved by a smarter approach to popping
+                unselectNodes(Color.blue);
+                branchNodesStack = new Stack<>();
 
-            n.setSelected(true, branchColor);
+                curr.setSelected(true, Color.RED);
+            }
 
             simulationStep++;
             view.repaint();
@@ -341,6 +332,8 @@ public class GraphController {
 
             branchEnd = null; // Reset branch color and start when branches converge
             branchColor = Color.RED;
+
+            branchNodesStack = new Stack<>();
 
             edgeNodes = new ArrayList<>();
             simulation = false;

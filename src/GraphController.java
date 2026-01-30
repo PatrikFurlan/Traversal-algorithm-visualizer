@@ -32,6 +32,7 @@ public class GraphController {
     private Node branchEnd = null; // Starting node of an alternative path branch in DFS and others (when ready)
     private Color branchColor = Color.RED;
     private Stack<Node> branchNodesStack = new Stack<>();
+    private Stack<Node[]> edgeNodesStack = new Stack<>();
 
     public GraphController(GraphModel model, GraphView view, SimulationPanel simPanel, AlgorithmCompute algoCompute) {
         this.model = model;
@@ -292,7 +293,7 @@ public class GraphController {
 
             // Get current node (node on this step)
             Node curr = algorithmVisited.get(simulationStep - 1);
-            Node prev;
+            Node prev = null;
 
             boolean isOnPath = algorithmPath.contains(curr);
             branchColor = isOnPath ? Color.RED : Color.BLUE;
@@ -300,8 +301,10 @@ public class GraphController {
             // If the current node isnt on the final path, switch color to BLUE. (NOT STRICTLY NECESSARY FOR NOW). When current isn't on the final path, push it to the nodes stack and color it BLUE.
             // If the stack already contains the current node, then that means that we have backtracked into it. Pop the current node and unselect it.
 
+            // TODO For selecting edges make an edgeNodes tuple for each step and push them to the stack. Pop them out of the stack the same way you did with the nodes
+
             if (simulationStep >= 2) {
-               prev = algorithmVisited.get(simulationStep - 2);
+                prev = algorithmVisited.get(simulationStep - 2);
             }
 
             if (!isOnPath) {
@@ -309,19 +312,27 @@ public class GraphController {
                     branchNodesStack.pop().setSelected(false, Color.BLACK);
                     //Unselect nodes and edges (Also pop edges)
 
+                    Node[] edgeNodes = edgeNodesStack.pop();
+                    selectEdge(edgeNodes[0], edgeNodes[1], false);
+
                 } else {
                     branchNodesStack.push(curr);
                     curr.setSelected(true, Color.BLUE);
 
-
+                    edgeNodesStack.push(new Node[]{prev, curr});
+                    selectEdge(prev, curr, Color.BLUE);
                 }
             } else {
                 // When you converge back into a branch clear stack and unselect all BLUE nodes
                 // TODO This is not optimal since the last element still stays in the stack. This should be resolved by a smarter approach to popping
-                unselectNodes(Color.blue);
+                unselectNodes(Color.BLUE);
+                unselectEdges(Color.BLUE);
+
                 branchNodesStack = new Stack<>();
+                edgeNodesStack = new Stack<>();
 
                 curr.setSelected(true, Color.RED);
+                if (algorithmPath.contains(prev)) selectEdge(prev, curr, Color.RED);
             }
 
             simulationStep++;
@@ -343,10 +354,10 @@ public class GraphController {
         }
     }
 
-    private void selectEdge(Node from, Node to) {
+    private void selectEdge(Node from, Node to, boolean b) {
         for (Edge e : model.getEdges()) {
             if (e.getFrom().equals(from) && e.getTo().equals(to) || e.getFrom().equals(to) && e.getTo().equals(from)) {
-                e.setSelected(true, Color.RED);
+                e.setSelected(b, Color.RED);
             }
         }
     }

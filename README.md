@@ -8,7 +8,7 @@ TAV is a program to help step-by-step visualization of traversal algorithms such
 
 To place a node, left-click anywhere on the canvas. You can also move nodes around by dragging them with your mouse.
 
-Drawing edges between nodes
+### Drawing edges between nodes
 
 To begin drawing an edge between nodes, right-click a node. The node will change color, which signals the node being selected and waiting for another node to be selected. Right-click on another available node to connect them.
 
